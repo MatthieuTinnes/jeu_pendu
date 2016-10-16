@@ -7,12 +7,32 @@
 #define TAILLEMOTDEFAUT 30
 int main()
 {
+    char modeJeu;
+    char play;
+    do
+    {
+        printf("Bienvenue dans le jeu du pendu !\n");
+        printf("------------------------------------------------\n");
+        printf("Voulez vous jouer en mode solo ou 2 joueurs ? (1/2) \n");
+        modeJeu = lireCaractere(modeJeu);
+        if(modeJeu == '1')
+            printf("Mode solo en construction ... \n");
+        else if(modeJeu == '2')
+            modeMulti();
+        else
+            printf("Veuillez entrez 1 ou 2\n");
+        
+        
+        printf("Voulez vous rejouer ? (O/N)\n");
+        play = lireCaractere(play);
+    } while(play == 'O');
+    return 0;
+}
+
+int modeMulti() //mode 2 joueurs sans dico
+{
     char motSecret[TAILLEMOTDEFAUT];
-    int nbEssai = 10;
     int tailleMotSecret,tailleMotEssai;
-    char lettreEssai;
-    printf("Bienvenue dans le jeu du pendu !\n");
-    printf("------------------------------------------------\n");
     printf("Entrez le mot secret : \n");
     lire(motSecret,TAILLEMOTDEFAUT);
     cacherMot();
@@ -21,28 +41,11 @@ int main()
     char motEssai[tailleMotEssai];
     initialiserMot(motEssai,tailleMotEssai);
     motMaj(motSecret,tailleMotSecret); //on met le mot secret en majuscule
-    
-    int i;
-    while(nbEssai>0) //boucle nb essai
-        {
-            printf("Vous avez encore %d essai !\n",nbEssai);
-            printf("Quel est le mot secret ? %s \n", motEssai);
-            lettreEssai = lireCaractere(lettreEssai);//On lit le caractere essai
-            if(comparer(lettreEssai, motSecret, motEssai,tailleMotSecret) == 0)//On regarde si la lettre est dans le mot
-                nbEssai--;
-            if(strcmp(motEssai, motSecret) == 0)
-            {
-                printf("Le mot secret est %s \n",motSecret);
-                printf("Bravo vous avez trouve le mot secret !\n");
-                return 0;
-            }
-        }
-    printf("Vous n'avez pas reussi a trouve le mot secret ... \nLa reponse etait : %s \n",motSecret);
+    boucleEssai(motSecret,motEssai,tailleMotSecret);
     return 0;
 }
 
-
-int comparer(char lettre,const char motSecret[], char motEssai[], const int tailleMotSecret)
+int comparer(const char lettre,const char motSecret[], char motEssai[], const int tailleMotSecret)
 {
     int taille;
     int i;
@@ -97,7 +100,7 @@ void cacherMot()//pour cacher le mot en affichant des espaces
             }
 }
 
-int lire(char *chaine, int longueur)
+int lire(char *chaine, const int longueur)
 {
     char *positionEntree = NULL;
  
@@ -115,4 +118,26 @@ int lire(char *chaine, int longueur)
     {
         return 0; // On renvoie 0 s'il y a eu une erreur
     }
+}
+int boucleEssai(const char motSecret[], char motEssai[], const int tailleMotSecret)
+{
+    int i;
+    int nbEssai = 10;
+    char lettreEssai;
+    while(nbEssai>0) //boucle nb essai
+        {
+            printf("Vous avez encore %d essai !\n",nbEssai);
+            printf("Quel est le mot secret ? %s \n", motEssai);
+            lettreEssai = lireCaractere(lettreEssai);//On lit le caractere essai
+            if(comparer(lettreEssai, motSecret, motEssai,tailleMotSecret) == 0)//On regarde si la lettre est dans le mot
+                nbEssai--;
+            if(strcmp(motEssai, motSecret) == 0)
+            {
+                printf("Le mot secret est %s \n",motSecret);
+                printf("Bravo vous avez trouve le mot secret !\n");
+                return 0;
+            }
+        }
+    printf("Vous n'avez pas reussi a trouve le mot secret ... \nLa reponse etait : %s \n",motSecret);
+    return 1;
 }
