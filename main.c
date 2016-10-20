@@ -9,6 +9,8 @@ int main()
 {
     char modeJeu;
     char play;
+    char motSecret[TAILLEMOTDEFAUT];
+    int tailleMotSecret,tailleMotEssai;
     do
     {
         printf("Bienvenue dans le jeu du pendu !\n");
@@ -16,9 +18,9 @@ int main()
         printf("Voulez vous jouer en mode solo ou 2 joueurs ? (1/2) \n");
         modeJeu = lireCaractere(modeJeu);
         if(modeJeu == '1')
-            printf("Mode solo en construction ... \n");
+            modeSolo(motSecret,tailleMotSecret,tailleMotEssai);
         else if(modeJeu == '2')
-            modeMulti();
+            modeMulti(motSecret,tailleMotSecret,tailleMotEssai);
         else
             printf("Veuillez entrez 1 ou 2\n");
         
@@ -29,11 +31,9 @@ int main()
     return 0;
 }
 
-int modeMulti() //mode 2 joueurs sans dico
-{
-    char motSecret[TAILLEMOTDEFAUT];
-    int tailleMotSecret,tailleMotEssai;
-    printf("Entrez le mot secret : \n");
+int modeMulti(char motSecret[], int tailleMotSecret, int tailleMotEssai) //mode 2 joueurs sans dico
+{	
+	printf("Entrez le mot secret : \n");
     lire(motSecret,TAILLEMOTDEFAUT);
     cacherMot();
     tailleMotSecret = strlen(motSecret);
@@ -43,6 +43,42 @@ int modeMulti() //mode 2 joueurs sans dico
     motMaj(motSecret,tailleMotSecret); //on met le mot secret en majuscule
     boucleEssai(motSecret,motEssai,tailleMotSecret);
     return 0;
+}
+
+int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
+{
+	FILE* dico = NULL;
+	int caractereCourant,ligneRandom,i;
+	int nbLignes = 0;
+	dico = fopen("dico.txt", "r");
+	if (dico != NULL)
+	{
+		do
+		{
+			caractereCourant = fgetc(dico);
+			if(caractereCourant == '\n')
+				nbLignes++;
+
+		}while(caractereCourant != EOF); //on compte le nb de lignes du fichier
+		rewind(dico);
+		ligneRandom = rand_a_b(0,nbLignes+1);
+		printf("Ligne random %d\n",ligneRandom );
+		for(i = 0; i != ligneRandom; i++)
+		{
+			fgets(motSecret, TAILLEMOTDEFAUT, dico); //selection d'un mot random dans le fichier
+		}
+	}
+		else
+		{
+			printf("Erreur lors du l'ouverture du fichier dico.txt");
+		}
+	fclose(dico);
+	supprEnter(motSecret);
+	tailleMotSecret = strlen(motSecret);
+    tailleMotEssai = tailleMotSecret;
+	char motEssai[tailleMotEssai];
+    initialiserMot(motEssai,tailleMotEssai);
+    boucleEssai(motSecret,motEssai,tailleMotSecret);
 }
 
 int comparer(const char lettre,const char motSecret[], char motEssai[], const int tailleMotSecret)
@@ -63,6 +99,7 @@ int comparer(const char lettre,const char motSecret[], char motEssai[], const in
     else
         return 1;
 }
+
 int initialiserMot(char mot[], const int nbLettre)
 {
     int i;
@@ -73,6 +110,7 @@ int initialiserMot(char mot[], const int nbLettre)
 
     return 0;
 }
+
 char lireCaractere()
 {
     char caractere = 0;
@@ -119,6 +157,7 @@ int lire(char *chaine, const int longueur)
         return 0; // On renvoie 0 s'il y a eu une erreur
     }
 }
+
 int boucleEssai(const char motSecret[], char motEssai[], const int tailleMotSecret)
 {
     int i;
@@ -140,4 +179,21 @@ int boucleEssai(const char motSecret[], char motEssai[], const int tailleMotSecr
         }
     printf("Vous n'avez pas reussi a trouve le mot secret ... \nLa reponse etait : %s \n",motSecret);
     return 1;
+}
+
+int rand_a_b(int a, int b)
+{
+    return rand()%(b-a) +a;
+}
+
+int supprEnter(char *chaine)
+{
+    char *positionEntree = NULL;
+
+    positionEntree = strchr(chaine, '\n'); // On recherche l'"Entrée"
+    if (positionEntree != NULL) // Si on a trouvé le retour à la ligne
+    {
+    	*positionEntree = '\0'; // On remplace ce caractère par \0
+    }
+    return 1; // On renvoie 1 si la fonction s'est déroulée sans erreur
 }
