@@ -18,13 +18,17 @@ int main()
         printf("Voulez vous jouer en mode solo ou 2 joueurs ? (1/2) \n");
         modeJeu = lireCaractere(modeJeu);
         if(modeJeu == '1')
-            modeSolo(motSecret,tailleMotSecret,tailleMotEssai);
+            {
+                if(modeSolo(motSecret,tailleMotSecret,tailleMotEssai) == EXIT_FAILURE)
+                    return EXIT_FAILURE;
+            }
+
         else if(modeJeu == '2')
             modeMulti(motSecret,tailleMotSecret,tailleMotEssai);
         else
             printf("Veuillez entrez 1 ou 2\n");
-        
-        
+
+
         printf("Voulez vous rejouer ? (O/N)\n");
         play = lireCaractere(play);
     } while(play == 'O');
@@ -32,7 +36,7 @@ int main()
 }
 
 int modeMulti(char motSecret[], int tailleMotSecret, int tailleMotEssai) //mode 2 joueurs sans dico
-{	
+{
 	printf("Entrez le mot secret : \n");
     lire(motSecret,TAILLEMOTDEFAUT);
     cacherMot();
@@ -55,14 +59,13 @@ int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
 	{
 		do
 		{
-			caractereCourant = fgetc(dico);
+		    caractereCourant = fgetc(dico);
 			if(caractereCourant == '\n')
 				nbLignes++;
 
 		}while(caractereCourant != EOF); //on compte le nb de lignes du fichier
 		rewind(dico);
 		ligneRandom = rand_a_b(0,nbLignes+1);
-		printf("Ligne random %d\n",ligneRandom );
 		for(i = 0; i != ligneRandom; i++)
 		{
 			fgets(motSecret, TAILLEMOTDEFAUT, dico); //selection d'un mot random dans le fichier
@@ -71,6 +74,7 @@ int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
 		else
 		{
 			printf("Erreur lors du l'ouverture du fichier dico.txt");
+			return EXIT_FAILURE;
 		}
 	fclose(dico);
 	supprEnter(motSecret);
@@ -132,7 +136,7 @@ void motMaj(char mot[], const int taillemot)
 void cacherMot()//pour cacher le mot en affichant des espaces
 {
     int compteurLignes;
-    for (compteurLignes = 0; compteurLignes < 100; compteurLignes++) 
+    for (compteurLignes = 0; compteurLignes < 100; compteurLignes++)
             {
                 printf("\n");
             }
@@ -141,7 +145,7 @@ void cacherMot()//pour cacher le mot en affichant des espaces
 int lire(char *chaine, const int longueur)
 {
     char *positionEntree = NULL;
- 
+
     // On lit le texte saisi au clavier
     if (fgets(chaine, longueur, stdin) != NULL)  // Pas d'erreur de saisie ?
     {

@@ -11,4 +11,5 @@ int modeMulti(char motSecret[], int tailleMotSecret, int tailleMotEssai);
 int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai);
 int rand_a_b(int a, int b);
 int supprEnter(char *chaine);
+
 #endif // MAIN_H_INCLUDED
