@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include "main.h"
 #define TAILLEMOTDEFAUT 30
 int main()
@@ -10,21 +11,28 @@ int main()
     char modeJeu;
     char play;
     char motSecret[TAILLEMOTDEFAUT];
-    int tailleMotSecret,tailleMotEssai;
+    int tailleMotSecret;
     do
     {
+        tailleMotSecret = 0;
+        modeJeu = 0;
+
         printf("Bienvenue dans le jeu du pendu !\n");
         printf("------------------------------------------------\n");
         printf("Voulez vous jouer en mode solo ou 2 joueurs ? (1/2) \n");
-        modeJeu = lireCaractere(modeJeu);
+        while (modeJeu != '1' && modeJeu != '2' )
+        {
+          printf("Veuillez entrer 1 ou 2. \n");
+          modeJeu = lireCaractere(modeJeu);
+        }
         if(modeJeu == '1')
             {
-                if(modeSolo(motSecret,tailleMotSecret,tailleMotEssai) == EXIT_FAILURE)
+                if(modeSolo(motSecret,tailleMotSecret) == EXIT_FAILURE)
                     return EXIT_FAILURE;
             }
 
         else if(modeJeu == '2')
-            modeMulti(motSecret,tailleMotSecret,tailleMotEssai);
+            modeMulti(motSecret,tailleMotSecret);
         else
             printf("Veuillez entrez 1 ou 2\n");
 
@@ -35,24 +43,24 @@ int main()
     return 0;
 }
 
-int modeMulti(char motSecret[], int tailleMotSecret, int tailleMotEssai) //mode 2 joueurs sans dico
+int modeMulti(char motSecret[], int tailleMotSecret) //mode 2 joueurs sans dico
 {
 	printf("Entrez le mot secret : \n");
     lire(motSecret,TAILLEMOTDEFAUT);
     cacherMot();
     tailleMotSecret = strlen(motSecret);
-    tailleMotEssai = tailleMotSecret;
-    char motEssai[tailleMotEssai];
-    initialiserMot(motEssai,tailleMotEssai);
+    char motEssai[TAILLEMOTDEFAUT] = "******************************";
+    motEssai[tailleMotSecret] = '\0';
     motMaj(motSecret,tailleMotSecret); //on met le mot secret en majuscule
     boucleEssai(motSecret,motEssai,tailleMotSecret);
     return 0;
 }
 
-int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
+int modeSolo(char motSecret[], int tailleMotSecret)
 {
 	FILE* dico = NULL;
 	int caractereCourant,ligneRandom,i;
+	srand(time(NULL));
 	int nbLignes = 0;
 	dico = fopen("dico.txt", "r");
 	if (dico != NULL)
@@ -65,7 +73,7 @@ int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
 
 		}while(caractereCourant != EOF); //on compte le nb de lignes du fichier
 		rewind(dico);
-		ligneRandom = rand_a_b(0,nbLignes+1);
+		ligneRandom = (rand() % nbLignes-1)+1;
 		for(i = 0; i != ligneRandom; i++)
 		{
 			fgets(motSecret, TAILLEMOTDEFAUT, dico); //selection d'un mot random dans le fichier
@@ -79,16 +87,14 @@ int modeSolo(char motSecret[], int tailleMotSecret, int tailleMotEssai)
 	fclose(dico);
 	supprEnter(motSecret);
 	tailleMotSecret = strlen(motSecret);
-    tailleMotEssai = tailleMotSecret;
-	char motEssai[tailleMotEssai];
-    initialiserMot(motEssai,tailleMotEssai);
+    char motEssai[TAILLEMOTDEFAUT] = "******************************";
+    motEssai[tailleMotSecret] = '\0';
     boucleEssai(motSecret,motEssai,tailleMotSecret);
 }
 
 int comparer(const char lettre,const char motSecret[], char motEssai[], const int tailleMotSecret)
 {
-    int taille;
-    int i;
+    int i = 0;
     int succes = 0;
     for(i = 0; i < tailleMotSecret; i++) //on parcoure le mot essai
     {
@@ -102,17 +108,6 @@ int comparer(const char lettre,const char motSecret[], char motEssai[], const in
         return 0;
     else
         return 1;
-}
-
-int initialiserMot(char mot[], const int nbLettre)
-{
-    int i;
-    for(i = 0; i < nbLettre; i++)
-    {
-        mot[i] = '*';
-    }
-
-    return 0;
 }
 
 char lireCaractere()
@@ -182,7 +177,7 @@ int boucleEssai(const char motSecret[], char motEssai[], const int tailleMotSecr
             }
         }
     printf("Vous n'avez pas reussi a trouve le mot secret ... \nLa reponse etait : %s \n",motSecret);
-    return 1;
+    return 0;
 }
 
 int rand_a_b(int a, int b)
